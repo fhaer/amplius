@@ -35,7 +35,7 @@ Transfer Commands:
 --retrieve <URI>                     retrieve all files from an ipfs, git, or HTTP <URI>
 ```
 
-# Requirements
+## Requirements
 
 Amplius requires an up-to-date distribution of Python 3 for Linux or macOS with the additional modules requests, base58, web3 and bs4.
 
