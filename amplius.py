@@ -6,6 +6,8 @@ from amplius import attestation_controller
 from amplius import transfer_controller
 from amplius import identity_controller
 
+from time import perf_counter_ns
+
 def print_usage():
     print("Usage: amplius.py <command> [argument]*")
     print("")
@@ -29,11 +31,11 @@ def print_usage():
     print("--eth-account-show                   show the current identity for attestations")
     print("")
     print("Transfer Commands:")
-    print("--distribute [file]*                 distribute all files using all transfer clients with example repositores")
+    print("--distribute [file]*                 distribute all files using all transfer clients with example repositories")
     print("--distribute=ipfs [file]*            add files to IPFS and pin at a remote node")
     print("--distribute=<GIT_URL> [file]*       commit and push all files with Git to <GIT_URL> starting with git or http and ending in .git")
     print("--distribute=<HTTP_URL> [file]*      send all files with HTTP PUT requests to <HTTP_URL> starting with http")
-    print("--retrieve <URI>                     retrieve all files from an ipfs, git, or HTTP <URI>")
+    print("--retrieve [URI]*                    retrieve all files from ipfs, git, or HTTP <URI>")
     sys.exit()
 
 def attest(files):
@@ -51,11 +53,22 @@ def retrieve_claim(merkle_root, record_id_arg):
     else:
         print("Error: record ID is not numeric")
         sys.exit()
+
+    print("Time measurement start")
+    t_start = perf_counter_ns()
     (mime, ts, claim_issuer, ext_id, addr_by_file_set) = attestation_controller.retrieve(identity_acc, merkle_root, record_id)
-    
+    t_stop = perf_counter_ns()
+    print("Duration for retrieving claim record:\n", (t_stop-t_start))
+
     print("\nAttestation Claim\n")
     print_claim_record(mime, ts, claim_issuer, ext_id, addr_by_file_set)
     print()
+
+    return (record_id, addr_by_file_set)
+
+def retrieve_claim_and_files(merkle_root, record_id_arg):
+
+    (record_id, addr_by_file_set) = retrieve_claim(merkle_root, record_id_arg)
 
     print("\nRetrieving Files\n")
     file_sets = []
@@ -65,7 +78,7 @@ def retrieve_claim(merkle_root, record_id_arg):
             t_file_set = transfer_controller.retrieve(uri)
             print("FS", t_file_set)
             file_sets.append(t_file_set)
-    
+
     for file_set in file_sets:
         print("FS", file_set)
         validate_claim(record_id, file_set)
@@ -86,7 +99,11 @@ def issue_claim(files, addresses_by_file_set):
     if len(identity_acc.address) < 40:
         print("Error: claim issuer identity account address not set")
         sys.exit()
+    print("Time measurement start")
+    t_start = perf_counter_ns()
     attestation_controller.issue_claim(identity_acc, files, addresses_by_file_set)
+    t_stop = perf_counter_ns()
+    print("Duration for recording of claim:\n", (t_stop-t_start))
 
 def issue_claim_from_uris(uris):
     addresses_by_file_set = []
@@ -97,7 +114,7 @@ def issue_claim_from_uris(uris):
         addresses_by_file_set.append(address)
         # retrieve file
         files.extend(transfer_controller.retrieve(uri))
-    
+
     print("\n\nFiles retrieved:\n")
     print(files)
     issue_claim(files, addresses_by_file_set)
@@ -107,11 +124,23 @@ def resolve_link(link_arg):
     link_id = link_arg
 
     identity_acc = identity_controller.get_identity()
+
+    print("Time measurement start")
+    t_start = perf_counter_ns()
     (merkle_root, link_issuer, parent_link_id, n_records) = attestation_controller.resolve_link(identity_acc, link_id)
+    t_stop = perf_counter_ns()
+    print("Duration for resolving link:\n", (t_stop-t_start))
+
     print("Merkle root:", merkle_root)
     print("Link issuer:", link_issuer)
-    print("Parent link ID:", parent_link_id)    
+    print("Parent link ID:", parent_link_id)
     print("Number of records:", n_records)
+
+    return (identity_acc, merkle_root, record_id, n_records, link_issuer)
+
+def resolve_link_and_claims(link_arg):
+
+    (identity_acc, merkle_root, n_records, link_issuer) = resolve_link(link_arg)
 
     print("\n\nClaim records issued by link issuer:\n")
     for record_id in range(1, n_records+1):
@@ -142,7 +171,11 @@ def link(l_arg, merkle_root, parent_link_id):
     elif len(link_id) < 5 or len(link_id) > 32:
         print("Link ID length out of range (5-32 characters)")
         sys.exit()
+    print("Time measurement start")
+    t_start = perf_counter_ns()
     attestation_controller.link(identity_acc, link_id, merkle_root, parent_link_id)
+    t_stop = perf_counter_ns()
+    print("Duration for creating link:\n", (t_stop-t_start))
 
 def validate_claim(id_arg, files):
     record_id = id_arg
@@ -153,13 +186,17 @@ def validate_claim(id_arg, files):
         issuer_addr = id_arg
     else:
         record_id = 1
-    
+
     identity_acc = identity_controller.get_identity()
 
     print("Validating claim ...", sep="")
 
     if len(issuer_addr) > 0:
+        print("Time measurement start")
+        t_start = perf_counter_ns()
         (merkle_root, claim_validation_result) = attestation_controller.validate_claim_issuer(identity_acc, files, issuer_addr)
+        t_stop = perf_counter_ns()
+        print("Duration for validation of claim:\n", (t_stop-t_start))
         (is_valid, ci_account_address, timestamp) = claim_validation_result
         print("\nClaim validation result for Merkle root 0x", merkle_root.hex(), ", issuer ", issuer_addr, ":\n", sep="")
         print("Validity:", is_valid)
@@ -168,7 +205,11 @@ def validate_claim(id_arg, files):
         print()
 
     else:
+        print("Time measurement start")
+        t_start = perf_counter_ns()
         (merkle_root, claim_validation_result)  = attestation_controller.validate_claim(identity_acc, files, record_id)
+        t_stop = perf_counter_ns()
+        print("Duration for validation of claim:\n", (t_stop-t_start))
         (is_valid, ci_account_address, timestamp) = claim_validation_result
         print("\nClaim validation result for Merkle root 0x", merkle_root.hex(), ", record ID ", record_id, ":\n", sep="")
         print("Validity:", is_valid)
@@ -185,7 +226,7 @@ def identity_eth_account_new():
     print("Address:", identity_acc.address)
 
 def distribute(files):
-    addresses_http = distribute_http("http://x/amplius/", files)
+    addresses_http = distribute_http("http://x/", files)
     addresses_git = distribute_git("https://github.com/fhaer/ampl-case-study-5.git", files)
     addresses_ipfs = distribute_ipfs(files)
     addresses_by_file_set = [ addresses_http, addresses_git, addresses_ipfs ]
@@ -202,16 +243,25 @@ def distribute_git(url, files):
     return addresses
 
 def distribute_http(url, files):
+    print("Time measurement start")
+    t_start = perf_counter_ns()
     addresses = transfer_controller.distribute_http(url, files)
+    t_stop = perf_counter_ns()
+    print("Duration for HTTP upload:\n", (t_stop-t_start))
     return addresses
 
 def retrieve_files(uri):
+    print("Time measurement start")
+    t_start = perf_counter_ns()
     transfer_controller.retrieve(uri)
+    t_stop = perf_counter_ns()
+    print("Duration for HTTP download:\n", (t_stop-t_start))
+
 
 def parse_cli():
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "arivedighf", 
+        opts, args = getopt.getopt(sys.argv[1:], "arivedighf",
             ["attest", "link=", "retrieve=", "resolve=", "issue-claim", "validate-claim=",
             "eth-account-new", "eth-account-show", "distribute="])
     except getopt.GetoptError as err:
@@ -225,13 +275,18 @@ def parse_cli():
         if o in ("-a", "--attest"):
             attest(args)
         elif o in ("-r", "--retrieve"):
-            if len(args) == 1:
+            if len(args) == 1 and a.startswith("0x"):
                 merkle_root = a
                 record_id = args[0]
                 retrieve_claim(merkle_root, record_id)
-            elif len(args) == 0:
+            elif len(args) < 1:
                 uri = a
                 retrieve_files(uri)
+            elif len(args) >= 1:
+                uri = a
+                retrieve_files(uri)
+                for a_uri in args:
+                    retrieve_files(a_uri)
 
         elif o in ("--resolve"):
             link_id = a
@@ -268,7 +323,10 @@ def parse_cli():
             elif uri == "ipfs":
                 distribute_ipfs(args)
             else:
-                distribute(args)
+                print("No URIs given for distribution")
+                files = [a]
+                files.extend(args)
+                distribute(files)
         else:
             print_usage()
 

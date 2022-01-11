@@ -148,7 +148,7 @@ def validate_claim(identity, files, record_id):
         sys.exit()
 
     claim_validation_result = w3a.validate_claim(merkle_root, record_id)
-    
+
     return (merkle_root, claim_validation_result)
 
 def validate_claim_issuer(identity, files, issuer_addr):
@@ -156,7 +156,7 @@ def validate_claim_issuer(identity, files, issuer_addr):
     merkle_root = merkle_tree_hashing.calculate_merkle_root(files)
 
     w3a = attestation_node.Web3Attestation(identity)
-    
+
     if not w3a.w3.isConnected():
         print("web3 not connected, exiting")
         sys.exit()

@@ -35,7 +35,7 @@ def retrieve(uri):
     if (uri.startswith("http") and uri.endswith(".git")):
         transfer_client = git.GitClient(timestamp, "git")
         files = transfer_client.retrieve(uri)
-    
+
     elif uri.startswith("http://127.0.0.1:8080/ipfs/"):
         transfer_client = ipfs.IpfsCient(timestamp, "ipfs")
         files = transfer_client.retrieve(uri[27:])
@@ -47,5 +47,5 @@ def retrieve(uri):
     elif uri.startswith("ipfs:"):
         transfer_client = ipfs.IpfsCient(timestamp, "ipfs")
         files = transfer_client.retrieve(uri[5:])
-    
+
     return files

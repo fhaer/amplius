@@ -25,10 +25,10 @@ class AttestationNode:
 class GethNode(AttestationNode):
 
 	GETH = "geth"
-	
+
 	GETH_DATADIR = "geth-data"
 	GETH_DATADIR_POA = "geth-data-poa"
-	
+
 	GETH_DATADIR_ANCIENT = "geth-data-ancient"
 	GETH_DATADIR_ANCIENT_POA = "geth-data-ancient-poa"
 
@@ -40,7 +40,7 @@ class GethNode(AttestationNode):
 	def run_node(self, account_address, account_password_file):
 		super().run_node()
 		subprocess.run([self.GETH, "--datadir", self.GETH_DATADIR, "datadir.ancient", self.GETH_DATADIR_ANCIENT, "--ethash.dagdir", self.GETH_DAG_DIR, "--cache", 4000, "--syncmode", "full", "--ws", "--ws.api", "eth,net,web3"])
-	
+
 	def run_node_poa_development(self, account_address, account_password_file):
 		super().run_node()
 		subprocess.run([self.GETH, "--datadir", self.GETH_DATADIR_POA, "datadir.ancient", self.GETH_DATADIR_ANCIENT_POA, "--cache", 4000, "--syncmode", "full", "--rpccorsdomain", "*", "networkid", 55194, "--nodiscover", "--vmdebug"])
@@ -49,8 +49,8 @@ class GethNode(AttestationNode):
 class Web3Attestation(AttestationNode):
 
 	# Node Web Socket Connection
-	#WEB3_ADDRESS = "ws://x:46804"
-	WEB3_ADDRESS = "wss://mainnet.infura.io/ws/v3/5cc53e4f3f614825be68d6aae4897cf4"
+	WEB3_ADDRESS = "ws://127.0.0.1:8546"
+	#WEB3_ADDRESS = "wss://mainnet.infura.io/ws/v3/5cc53e4f3f614825be68d6aae4897cf4"
 
 	# Node HTTP Connection
 	#WEB3_ADDRESS = "http://127.0.0.1:8545"
@@ -64,12 +64,12 @@ class Web3Attestation(AttestationNode):
 			provider = Web3.WebsocketProvider(self.WEB3_ADDRESS, websocket_timeout=3)
 		else:
 			provider = Web3.HTTPProvider(self.WEB3_ADDRESS)
-		
+
 		self.w3 = Web3(provider)
 
 		# for proof-of-authority:
 		#self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-		
+
 		self.att_contract = None
 
 	def get_attestation_contract(self):
@@ -190,7 +190,7 @@ class Web3Attestation(AttestationNode):
 
 			# recordClaimURIExtension(bytes32 merkleRoot, uint8 claimRecordID, uint8 extensionID, bytes16 extension,
 			# bool isAlternativePath, bool hasNext)
-			
+
 			print("Claim recorded with Merkle root: 0x", bytes.hex(merkle_root), ", record ID: ", record_id, sep="", end="\n\n")
 		else:
 			print("Error: web3 is not connected to blockchain node", self.WEB3_ADDRESS)
@@ -299,5 +299,5 @@ class Web3Attestation(AttestationNode):
 			merkle_root_prime_bytes32 = data_coding.encode_binary_bytes32(merkle_root)
 
 			(is_valid, ci_account_address, timestamp) = att_contract.functions.validateClaim(merkle_root_bytes32, record_id, merkle_root_prime_bytes32).call()
-			
+
 			return (is_valid, ci_account_address, timestamp)
