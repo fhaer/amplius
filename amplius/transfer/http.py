@@ -41,7 +41,7 @@ class HttpClient(tc.TransferClient):
         addresses = []
         for f in files:
             print("\nUpload", f, "...")
-            upload_cmd = [self.CURL, "-T", os.path.basename(f), uri]
+            upload_cmd = [self.CURL, "-s", "-T", os.path.basename(f), uri]
             #upload_cmd_post = [self.CURL, "-X", "POST", uri, "-F", "file=@/" + os.path.basename(f)]
             subprocess.run(upload_cmd)
             address = uri + os.path.basename(f)
@@ -83,10 +83,10 @@ class HttpClient(tc.TransferClient):
         for link in soup.find_all('a', href=True):
             multiple_files = True
             file_uri = uri + link['href']
-            subprocess.run([self.WGET, file_uri])
+            subprocess.run([self.WGET, "-q", file_uri])
 
         if not multiple_files:
-            subprocess.run([self.WGET, uri])
+            subprocess.run([self.WGET, "-q", uri])
 
         os.chdir(self.init_dir)
         return self.ls_repository(repository_dir)
