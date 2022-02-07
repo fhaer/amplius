@@ -13,7 +13,7 @@ def print_usage():
     print("")
     print("Amplius is a user interface for creating and verifying attested multi-protocol links (AMPL). The prototype supports the transfer clients IPFS, Git, and HTTP.")
     print("")
-    print("<command> is one of the following attestation, identity_acc, or transfer commands.")
+    print("<command> is one of the following attestation, identity, or transfer commands.")
     print("")
     print("Attestation Commands:")
     print("--attest [file]*                     create an identity if none is present, distribute all files, issue a content-based claim")
