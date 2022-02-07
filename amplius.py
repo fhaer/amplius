@@ -11,7 +11,7 @@ from time import perf_counter_ns
 def print_usage():
     print("Usage: amplius.py <command> [argument]*")
     print("")
-    print("Amplius a user interface for creating and verifying attested multi-protocol links (AMPL). The prototype supports the transfer clients IPFS, Git, and HTTP.")
+    print("Amplius is a user interface for creating and verifying attested multi-protocol links (AMPL). The prototype supports the transfer clients IPFS, Git, and HTTP.")
     print("")
     print("<command> is one of the following attestation, identity_acc, or transfer commands.")
     print("")
