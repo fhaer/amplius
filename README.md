@@ -8,7 +8,7 @@ The Amplius prototype is intended to demonstrate the feasibility of a multi-prot
 ```
 Usage: amplius.py <command> [argument]*
 
-Amplius a user interface for creating and verifying attested multi-protocol links (AMPL). The prototype supports the transfer clients IPFS, Git, and HTTP.
+Amplius is a user interface for creating and verifying attested multi-protocol links (AMPL). The prototype supports the transfer clients IPFS, Git, and HTTP.
 
 <command> is one of the following attestation, identity_acc, or transfer commands.
 
