@@ -39,3 +39,6 @@ Transfer Commands:
 
 Amplius requires an up-to-date distribution of Python 3 for Linux or macOS with the additional modules requests, base58, web3 and bs4.
 
+## Zenodo
+
+[![DOI](https://zenodo.org/badge/432244753.svg)](https://zenodo.org/badge/latestdoi/432244753)
