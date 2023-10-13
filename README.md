@@ -39,6 +39,8 @@ Transfer Commands:
 
 Amplius requires an up-to-date distribution of Python 3 for Linux or macOS with the additional modules requests, base58, web3 and bs4.
 
-
-
 [![DOI](https://zenodo.org/badge/432244753.svg)](https://zenodo.org/badge/latestdoi/432244753)
+
+## Related Publication
+
+Härer, Felix, Fill, Hans-Georg (2022): Decentralized attestation and distribution of information using blockchains and multi-protocol storage, IEEE Access, Vol 10, pp. 18035-18054. DOI: 10.1109/ACCESS.2022.3150356.
